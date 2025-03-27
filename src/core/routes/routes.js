@@ -19,14 +19,13 @@ const ForgotPasswordPage = lazy(() => import('../../features/auth/pages/ForgotPa
 const ResetPasswordPage = lazy(() => import('../../features/auth/pages/ResetPasswordPage'));
 
 // Protected pages
-const DashboardPage = lazy(() => import('../../features/dashboard/pages/DashboardPage'));
 const PromptPage = lazy(() => import('../../features/prompt/pages/PromptPage'));
 const TeamsPage = lazy(() => import('../../features/team/pages/TeamsPage'));
 const TeamDetailPage = lazy(() => import('../../features/team/pages/TeamDetailPage'));
 const CreateTeamPage = lazy(() => import('../../features/team/pages/CreateTeamPage'));
 const ProfilePage = lazy(() => import('../../features/account/pages/ProfilePage'));
 const SettingsPage = lazy(() => import('../../features/account/pages/SettingsPage'));
-const NotFoundPage = lazy(() => import('../../features/shared/pages/NotFoundPage'));
+const NotFoundPage = lazy(() => import('../../features/shared/layout/NotFoundPage'));
 
 // Subscription pages
 const PlansPage = lazy(() => import('../../features/subscription/pages/PlansPage'));
@@ -46,29 +45,19 @@ const AppRoutes = () => {
         {/* Public routes */}
         <Route
           path="/login"
-          element={currentUser ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+          element={currentUser ? <Navigate to="/prompt" replace /> : <LoginPage />}
         />
         <Route
           path="/register"
-          element={currentUser ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
+          element={currentUser ? <Navigate to="/prompt" replace /> : <RegisterPage />}
         />
         <Route
           path="/forgot-password"
-          element={currentUser ? <Navigate to="/dashboard" replace /> : <ForgotPasswordPage />}
+          element={currentUser ? <Navigate to="/prompt" replace /> : <ForgotPasswordPage />}
         />
         <Route
           path="/reset-password"
-          element={currentUser ? <Navigate to="/dashboard" replace /> : <ResetPasswordPage />}
-        />
-
-        {/* Protected routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
+          element={currentUser ? <Navigate to="/prompt" replace /> : <ResetPasswordPage />}
         />
 
         {/* Dataset routes */}
@@ -196,7 +185,7 @@ const AppRoutes = () => {
         />
 
         {/* Redirect and 404 */}
-        <Route path="/" element={<Navigate to={currentUser ? "/dashboard" : "/login"} replace />} />
+        <Route path="/" element={<Navigate to={currentUser ? "/prompt" : "/login"} replace />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
