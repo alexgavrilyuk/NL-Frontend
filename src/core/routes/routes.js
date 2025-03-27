@@ -18,8 +18,6 @@ const ResetPasswordPage = lazy(() => import('../../features/auth/pages/ResetPass
 
 // Protected pages
 const DashboardPage = lazy(() => import('../../features/dashboard/pages/DashboardPage'));
-const DatasetsPage = lazy(() => import('../../features/datasets/pages/DatasetsPage'));
-const DatasetDetailPage = lazy(() => import('../../features/datasets/pages/DatasetDetailPage'));
 const PromptPage = lazy(() => import('../../features/prompt/pages/PromptPage'));
 const ReportsListPage = lazy(() => import('../../features/reporting/pages/ReportsListPage'));
 const ReportPage = lazy(() => import('../../features/reporting/pages/ReportPage'));

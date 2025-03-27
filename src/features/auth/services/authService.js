@@ -1,7 +1,14 @@
 // src/features/auth/services/authService.js
 
-import firebase from 'firebase/app';
-import 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  updateProfile
+} from 'firebase/auth';
 import apiClient from '../../shared/api/apiClient';
 
 // Firebase configuration - you'll need to add your own Firebase config
@@ -16,19 +23,24 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase if it hasn't been initialized yet
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+let firebaseApp;
+try {
+  firebaseApp = initializeApp(firebaseConfig);
+} catch (error) {
+  // Firebase already initialized
+  console.log('Firebase already initialized');
 }
+const auth = getAuth(firebaseApp);
 
 class AuthService {
   // Register a new user with Firebase
   async register(email, password, displayName) {
     try {
       // Create user in Firebase
-      const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
       // Update display name
-      await userCredential.user.updateProfile({
+      await updateProfile(userCredential.user, {
         displayName: displayName
       });
 
@@ -56,7 +68,7 @@ class AuthService {
   async login(email, password) {
     try {
       // Sign in with Firebase
-      const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
       // Get ID token
       const idToken = await userCredential.user.getIdToken();
@@ -84,7 +96,7 @@ class AuthService {
       await apiClient.post('/auth/logout');
 
       // Sign out from Firebase
-      await firebase.auth().signOut();
+      await signOut(auth);
 
       // Remove token from localStorage
       localStorage.removeItem('authToken');
@@ -97,7 +109,7 @@ class AuthService {
   // Get current user from Firebase
   getCurrentUser() {
     return new Promise((resolve, reject) => {
-      const unsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+      const unsubscribe = auth.onAuthStateChanged(async (user) => {
         unsubscribe();
 
         if (user) {
@@ -124,7 +136,7 @@ class AuthService {
   // Request password reset
   async forgotPassword(email) {
     try {
-      await firebase.auth().sendPasswordResetEmail(email);
+      await sendPasswordResetEmail(auth, email);
 
       // Also inform backend
       const response = await apiClient.post('/auth/forgot-password', { email });
