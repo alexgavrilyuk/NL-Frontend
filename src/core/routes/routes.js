@@ -24,6 +24,7 @@ const DashboardPage = lazy(() => import('../../features/dashboard/pages/Dashboar
 const PromptPage = lazy(() => import('../../features/prompt/pages/PromptPage'));
 const TeamsPage = lazy(() => import('../../features/team/pages/TeamsPage'));
 const TeamDetailPage = lazy(() => import('../../features/team/pages/TeamDetailPage'));
+const CreateTeamPage = lazy(() => import('../../features/team/pages/CreateTeamPage'));
 const ProfilePage = lazy(() => import('../../features/account/pages/ProfilePage'));
 const SettingsPage = lazy(() => import('../../features/account/pages/SettingsPage'));
 const NotFoundPage = lazy(() => import('../../features/shared/pages/NotFoundPage'));
@@ -135,6 +136,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <TeamsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/team/new"
+          element={
+            <ProtectedRoute>
+              <CreateTeamPage />
             </ProtectedRoute>
           }
         />
