@@ -6,6 +6,9 @@ import { Suspense, lazy } from 'react';
 import ProtectedRoute from './ProtectedRoute';
 import { useAuth } from '../../features/auth/context/AuthContext';
 import Loading from '../../features/shared/ui/Loading';
+import DatasetsPage from '../../features/datasets/pages/DatasetsPage';
+import DatasetDetailPage from '../../features/datasets/pages/DatasetDetailPage';
+import DatasetUploadPage from '../../features/datasets/pages/DatasetUploadPage';
 
 // Public pages
 const LoginPage = lazy(() => import('../../features/auth/pages/LoginPage'));
@@ -143,6 +146,32 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Dataset routes */}
+        <Route
+          path="/datasets"
+          element={
+            <ProtectedRoute>
+              <DatasetsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/datasets/new"
+          element={
+            <ProtectedRoute>
+              <DatasetUploadPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/datasets/:id"
+          element={
+            <ProtectedRoute>
+              <DatasetDetailPage />
             </ProtectedRoute>
           }
         />
