@@ -6,6 +6,7 @@ import { ThemeProvider } from './core/theme/ThemeProvider';
 import { AuthProvider } from './features/auth/context/AuthContext';
 import { DatasetProvider } from './features/datasets/context/DatasetContext';
 import { PromptProvider } from './features/prompt/context/PromptContext';
+import { ReportProvider } from './features/reporting/context/ReportContext';
 import AppRoutes from './core/routes/routes';
 import MainLayout from './features/shared/layout/MainLayout';
 
@@ -15,11 +16,13 @@ function App() {
       <AuthProvider>
         <DatasetProvider>
           <PromptProvider>
-            <Router>
-              <MainLayout>
-                <AppRoutes />
-              </MainLayout>
-            </Router>
+            <ReportProvider>
+              <Router>
+                <MainLayout>
+                  <AppRoutes />
+                </MainLayout>
+              </Router>
+            </ReportProvider>
           </PromptProvider>
         </DatasetProvider>
       </AuthProvider>

@@ -9,6 +9,9 @@ import Loading from '../../features/shared/ui/Loading';
 import DatasetsPage from '../../features/datasets/pages/DatasetsPage';
 import DatasetDetailPage from '../../features/datasets/pages/DatasetDetailPage';
 import DatasetUploadPage from '../../features/datasets/pages/DatasetUploadPage';
+import ReportsListPage from '../../features/reporting/pages/ReportsListPage';
+import ReportPage from '../../features/reporting/pages/ReportPage';
+import CreateReportPage from '../../features/reporting/pages/CreateReportPage';
 
 // Public pages
 const LoginPage = lazy(() => import('../../features/auth/pages/LoginPage'));
@@ -19,8 +22,6 @@ const ResetPasswordPage = lazy(() => import('../../features/auth/pages/ResetPass
 // Protected pages
 const DashboardPage = lazy(() => import('../../features/dashboard/pages/DashboardPage'));
 const PromptPage = lazy(() => import('../../features/prompt/pages/PromptPage'));
-const ReportsListPage = lazy(() => import('../../features/reporting/pages/ReportsListPage'));
-const ReportPage = lazy(() => import('../../features/reporting/pages/ReportPage'));
 const TeamsPage = lazy(() => import('../../features/team/pages/TeamsPage'));
 const TeamDetailPage = lazy(() => import('../../features/team/pages/TeamDetailPage'));
 const ProfilePage = lazy(() => import('../../features/account/pages/ProfilePage'));
@@ -76,6 +77,14 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="/datasets/new"
+          element={
+            <ProtectedRoute>
+              <DatasetUploadPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/datasets/:id"
           element={
             <ProtectedRoute>
@@ -100,6 +109,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <ReportsListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/new"
+          element={
+            <ProtectedRoute>
+              <CreateReportPage />
             </ProtectedRoute>
           }
         />
@@ -144,32 +161,6 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <SettingsPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Dataset routes */}
-        <Route
-          path="/datasets"
-          element={
-            <ProtectedRoute>
-              <DatasetsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/datasets/new"
-          element={
-            <ProtectedRoute>
-              <DatasetUploadPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/datasets/:id"
-          element={
-            <ProtectedRoute>
-              <DatasetDetailPage />
             </ProtectedRoute>
           }
         />
