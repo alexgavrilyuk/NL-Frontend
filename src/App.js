@@ -1,4 +1,4 @@
-// src/App.js
+// src/App.js (update)
 
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { DatasetProvider } from './features/datasets/context/DatasetContext';
 import { PromptProvider } from './features/prompt/context/PromptContext';
 import { ReportProvider } from './features/reporting/context/ReportContext';
 import { TeamProvider } from './features/team/context/TeamContext';
+import { AccountProvider } from './features/account/context/AccountContext';
 import AppRoutes from './core/routes/routes';
 import MainLayout from './features/shared/layout/MainLayout';
 
@@ -15,19 +16,21 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <TeamProvider>
-          <DatasetProvider>
-            <PromptProvider>
-              <ReportProvider>
-                <Router>
-                  <MainLayout>
-                    <AppRoutes />
-                  </MainLayout>
-                </Router>
-              </ReportProvider>
-            </PromptProvider>
-          </DatasetProvider>
-        </TeamProvider>
+        <AccountProvider>
+          <TeamProvider>
+            <DatasetProvider>
+              <PromptProvider>
+                <ReportProvider>
+                  <Router>
+                    <MainLayout>
+                      <AppRoutes />
+                    </MainLayout>
+                  </Router>
+                </ReportProvider>
+              </PromptProvider>
+            </DatasetProvider>
+          </TeamProvider>
+        </AccountProvider>
       </AuthProvider>
     </ThemeProvider>
   );
