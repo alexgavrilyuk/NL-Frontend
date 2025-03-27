@@ -1,5 +1,4 @@
 // src/core/routes/routes.js
-
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
@@ -28,6 +27,10 @@ const CreateTeamPage = lazy(() => import('../../features/team/pages/CreateTeamPa
 const ProfilePage = lazy(() => import('../../features/account/pages/ProfilePage'));
 const SettingsPage = lazy(() => import('../../features/account/pages/SettingsPage'));
 const NotFoundPage = lazy(() => import('../../features/shared/pages/NotFoundPage'));
+
+// Subscription pages
+const PlansPage = lazy(() => import('../../features/subscription/pages/PlansPage'));
+const SubscriptionManagementPage = lazy(() => import('../../features/subscription/pages/SubscriptionManagementPage'));
 
 // Loading component for suspense fallback
 const LoadingPage = () => (
@@ -170,6 +173,24 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Subscription routes */}
+        <Route
+          path="/subscription/plans"
+          element={
+            <ProtectedRoute>
+              <PlansPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subscription/management"
+          element={
+            <ProtectedRoute>
+              <SubscriptionManagementPage />
             </ProtectedRoute>
           }
         />

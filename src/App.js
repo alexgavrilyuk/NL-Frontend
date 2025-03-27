@@ -1,9 +1,9 @@
-// src/App.js (update)
-
+// src/App.js
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider } from './core/theme/ThemeProvider';
 import { AuthProvider } from './features/auth/context/AuthContext';
+import { SubscriptionProvider } from './features/subscription/context/SubscriptionContext';
 import { DatasetProvider } from './features/datasets/context/DatasetContext';
 import { PromptProvider } from './features/prompt/context/PromptContext';
 import { ReportProvider } from './features/reporting/context/ReportContext';
@@ -16,21 +16,23 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AccountProvider>
-          <TeamProvider>
-            <DatasetProvider>
-              <PromptProvider>
-                <ReportProvider>
-                  <Router>
-                    <MainLayout>
-                      <AppRoutes />
-                    </MainLayout>
-                  </Router>
-                </ReportProvider>
-              </PromptProvider>
-            </DatasetProvider>
-          </TeamProvider>
-        </AccountProvider>
+        <SubscriptionProvider>
+          <AccountProvider>
+            <TeamProvider>
+              <DatasetProvider>
+                <PromptProvider>
+                  <ReportProvider>
+                    <Router>
+                      <MainLayout>
+                        <AppRoutes />
+                      </MainLayout>
+                    </Router>
+                  </ReportProvider>
+                </PromptProvider>
+              </DatasetProvider>
+            </TeamProvider>
+          </AccountProvider>
+        </SubscriptionProvider>
       </AuthProvider>
     </ThemeProvider>
   );
