@@ -8,7 +8,7 @@ import Alert from '../../shared/ui/Alert';
 import Modal from '../../shared/ui/Modal';
 import Loading from '../../shared/ui/Loading';
 import SubscriptionStatus from '../components/SubscriptionStatus';
-import BillingHistory from '../components/BillingHistory';
+import BillingHistory from './BillingHistory';
 import { useSubscription } from '../context/SubscriptionContext';
 
 const SubscriptionManagementPage = () => {

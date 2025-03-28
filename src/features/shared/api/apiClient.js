@@ -1,6 +1,7 @@
 // src/features/shared/api/apiClient.js
 
 import axios from 'axios';
+import { getAuth } from 'firebase/auth';
 
 // Base URL for API requests - update with your actual API URL
 const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001/api/v1';

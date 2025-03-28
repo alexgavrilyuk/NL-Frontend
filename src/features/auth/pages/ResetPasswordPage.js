@@ -7,7 +7,8 @@ import Input from '../../shared/ui/Input';
 import Button from '../../shared/ui/Button';
 import Alert from '../../shared/ui/Alert';
 import { useTheme } from '../../../core/theme/ThemeProvider';
-import firebase from 'firebase/app';
+import { initializeApp } from 'firebase/app';
+import { getAuth, confirmPasswordReset } from 'firebase/auth';
 
 const ResetPasswordPage = () => {
   const [password, setPassword] = useState('');
@@ -59,8 +60,9 @@ const ResetPasswordPage = () => {
     setLoading(true);
 
     try {
-      // Firebase password reset confirmation
-      await firebase.auth().confirmPasswordReset(oobCode, password);
+      // Firebase password reset confirmation using v9 API
+      const auth = getAuth();
+      await confirmPasswordReset(auth, oobCode, password);
 
       setSuccess(true);
       setError(null);

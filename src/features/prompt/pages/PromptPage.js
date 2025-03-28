@@ -1,187 +1,218 @@
 // src/features/prompt/pages/PromptPage.js
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePrompt } from '../context/PromptContext';
 import PageHeader from '../../shared/ui/PageHeader';
-import Card from '../../shared/ui/Card';
 import Button from '../../shared/ui/Button';
+import Card from '../../shared/ui/Card';
+import Input from '../../shared/ui/Input';
+import Loading from '../../shared/ui/Loading';
 import Alert from '../../shared/ui/Alert';
-import PromptInput from '../components/PromptInput';
-import PromptHistory from '../components/PromptHistory';
-import ProcessingIndicator, { PROMPT_STATES } from '../components/ProcessingIndicator';
-import PromptContextSettings from '../components/PromptContextSettings';
-import DynamicDashboard from '../../reporting/components/DynamicDashboard';
+import { usePrompt } from '../context/PromptContext';
+import { useDatasets } from '../../datasets/context/DatasetContext';
 
 const PromptPage = () => {
   const navigate = useNavigate();
+  const { datasets, loading: datasetsLoading } = useDatasets();
   const {
-    prompts,
-    loading,
-    error,
-    settings,
-    selectedPromptId,
-    execution,
-    loadPrompts,
-    selectPrompt,
-    createNewPrompt,
-    updateSettings
+    createPrompt,
+    executePrompt,
+    getResults,
+    promptId,
+    state,
+    progressPercentage,
+    results
   } = usePrompt();
 
-  // Keep track of whether to show results or input
-  const [showResults, setShowResults] = useState(false);
+  const [prompt, setPrompt] = useState('');
+  const [selectedDatasets, setSelectedDatasets] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null); // Added the missing error state
+  const [success, setSuccess] = useState(null);
 
   // Handle form submission
-  const handleSubmitPrompt = async (promptData) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!prompt) {
+      setError('Please enter a prompt to analyze your data');
+      return;
+    }
+
+    if (selectedDatasets.length === 0) {
+      setError('Please select at least one dataset');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
     try {
-      await createNewPrompt(promptData);
-      setShowResults(true);
+      // Create and process the prompt
+      await createPrompt(prompt, selectedDatasets);
+      setSuccess('Prompt created successfully! Processing your request...');
     } catch (err) {
-      console.error('Error submitting prompt:', err);
-      // Error handling is managed by the context
+      setError(err.message || 'Failed to create prompt');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Handle prompt selection from history
-  const handleSelectPrompt = (promptId) => {
-    selectPrompt(promptId);
-    setShowResults(true);
+  // Dataset selection handler
+  const handleDatasetSelection = (datasetId) => {
+    setSelectedDatasets(prev => {
+      if (prev.includes(datasetId)) {
+        return prev.filter(id => id !== datasetId);
+      } else {
+        return [...prev, datasetId];
+      }
+    });
   };
 
-  // New prompt button action
-  const handleNewPrompt = () => {
-    execution.reset();
-    setShowResults(false);
-  };
-
-  // Handle continue to execute button
-  const handleExecutePrompt = () => {
-    execution.executePrompt();
-  };
-
-  // Handle save as report button
-  const handleSaveReport = () => {
-    if (execution.results && execution.promptId) {
-      navigate(`/reports/new?promptId=${execution.promptId}`);
-    }
-  };
-
-  // If execution completes or fails, refresh the prompts list
+  // Execute prompt when ready
   useEffect(() => {
-    if (execution.state === PROMPT_STATES.COMPLETED || execution.state === PROMPT_STATES.FAILED) {
-      loadPrompts();
-    }
-  }, [execution.state, loadPrompts]);
+    const executePromptWhenReady = async () => {
+      if (state === 'ready_for_execution' && promptId) {
+        try {
+          await executePrompt();
+        } catch (err) {
+          setError(err.message || 'Failed to execute prompt');
+        }
+      }
+    };
+
+    executePromptWhenReady();
+  }, [state, promptId, executePrompt]);
+
+  // Get results when execution completes
+  useEffect(() => {
+    const fetchResultsWhenReady = async () => {
+      if (state === 'completed' && promptId) {
+        try {
+          await getResults();
+          navigate(`/reports/new?promptId=${promptId}`);
+        } catch (err) {
+          setError(err.message || 'Failed to get results');
+        }
+      }
+    };
+
+    fetchResultsWhenReady();
+  }, [state, promptId, getResults, navigate]);
+
+  if (datasetsLoading) {
+    return <Loading fullPage text="Loading datasets..." />;
+  }
 
   return (
-    <div className="prompt-page">
+    <div className="container mx-auto px-md py-lg">
       <PageHeader
-        title="AI Analysis"
-        subtitle="Ask questions about your financial data and get instant insights"
-        actions={
-          showResults && (
-            <Button
-              variant="primary"
-              onClick={handleNewPrompt}
-              leftIcon={
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-              }
-            >
-              New Analysis
-            </Button>
-          )
-        }
+        title="Create Analysis"
+        subtitle="Enter a prompt and select datasets to generate insights"
       />
 
       {error && (
         <Alert
           variant="error"
           className="mb-lg"
-          dismissible
           onDismiss={() => setError(null)}
+          dismissible
         >
           {error}
         </Alert>
       )}
 
-      {/* Processing indicator */}
-      <ProcessingIndicator
-        state={execution.state}
-        progress={execution.progressPercentage}
-        error={execution.error}
-      />
-
-      {/* Show either results or input form */}
-      {showResults ? (
-        <div className="results-container">
-          {/* Results view */}
-          {execution.state === PROMPT_STATES.READY_FOR_EXECUTION && (
-            <Card className="mb-lg">
-              <div className="p-md text-center">
-                <p className="mb-md">Analysis is ready to execute. Click the button below to generate visualizations.</p>
-                <Button
-                  variant="primary"
-                  onClick={handleExecutePrompt}
-                  className="mx-auto"
-                >
-                  Continue to Generate Visualizations
-                </Button>
-              </div>
-            </Card>
-          )}
-
-          {/* Results content */}
-          {execution.state === PROMPT_STATES.COMPLETED && execution.results && (
-            <div className="mb-lg">
-              <div className="flex justify-between items-center mb-md">
-                <h2 className="text-xl font-semibold">Analysis Results</h2>
-                <Button
-                  variant="primary"
-                  onClick={handleSaveReport}
-                  leftIcon={
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
-                    </svg>
-                  }
-                >
-                  Save as Report
-                </Button>
-              </div>
-
-              {/* Simple dashboard container for AI-generated code */}
-              <DynamicDashboard
-                code={execution.results.code}
-                data={execution.results.data}
-              />
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="input-container">
-          {/* Prompt input form */}
-          <PromptInput
-            onSubmit={handleSubmitPrompt}
-            isProcessing={execution.state !== PROMPT_STATES.IDLE}
-          />
-        </div>
+      {success && (
+        <Alert
+          variant="success"
+          className="mb-lg"
+        >
+          {success}
+        </Alert>
       )}
 
-      {/* History and Settings Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-lg mt-lg">
-        <PromptHistory
-          prompts={prompts}
-          currentPromptId={selectedPromptId}
-          onSelectPrompt={handleSelectPrompt}
-          isLoading={loading}
-        />
+      <Card className="mb-lg">
+        <form onSubmit={handleSubmit}>
+          <div className="p-md">
+            <h3 className="text-lg font-semibold mb-md">What would you like to analyze?</h3>
+            <Input
+              type="text"
+              placeholder="E.g., Show me monthly sales trends by region with insights on seasonal patterns"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              disabled={isSubmitting || state !== 'idle'}
+            />
+            <p className="text-text-secondary text-sm mt-sm">
+              Be specific about what you want to see. You can ask for specific visualizations,
+              time periods, and data comparisons.
+            </p>
+          </div>
 
-        <PromptContextSettings
-          settings={settings}
-          onUpdateSettings={updateSettings}
-        />
-      </div>
+          <div className="p-md border-t border-border-light">
+            <h3 className="text-lg font-semibold mb-md">Select Datasets</h3>
+
+            {datasets.length === 0 ? (
+              <div className="text-center py-lg">
+                <p className="text-text-secondary mb-md">You don't have any datasets yet.</p>
+                <Button
+                  variant="primary"
+                  onClick={() => navigate('/datasets/new')}
+                >
+                  Upload Dataset
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+                {datasets.map(dataset => (
+                  <div
+                    key={dataset.id}
+                    className={`border rounded-md p-md cursor-pointer hover:bg-background-secondary transition-colors
+                      ${selectedDatasets.includes(dataset.id) ? 'border-primary-500 bg-primary-50' : 'border-border-light'}
+                    `}
+                    onClick={() => handleDatasetSelection(dataset.id)}
+                  >
+                    <h4 className="font-medium">{dataset.name}</h4>
+                    {dataset.description && (
+                      <p className="text-text-secondary text-sm mt-1">{dataset.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="p-md border-t border-border-light flex justify-end">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting || state !== 'idle'}
+              disabled={isSubmitting || state !== 'idle' || datasets.length === 0}
+            >
+              Generate Analysis
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      {state !== 'idle' && state !== 'failed' && (
+        <Card className="mb-lg">
+          <div className="p-md">
+            <h3 className="text-lg font-semibold mb-md">Processing</h3>
+            <div className="w-full bg-background-secondary rounded-full h-4 mb-md">
+              <div
+                className="bg-primary-500 h-4 rounded-full transition-all duration-300"
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+            <p className="text-text-secondary">
+              {state === 'creating' && 'Creating your analysis...'}
+              {state === 'processing' && 'Processing your data...'}
+              {state === 'ready_for_execution' && 'Ready to execute analysis...'}
+              {state === 'executing' && 'Executing analysis...'}
+              {state === 'completed' && 'Analysis complete. Redirecting...'}
+            </p>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };
